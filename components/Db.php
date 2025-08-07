@@ -1,0 +1,653 @@
+<?php
+
+class Db
+{
+    /**
+     * Устанавливает соединение с базой данных
+     * @return \PDO <p>Объект класса PDO для работы с БД</p>
+     */
+
+    public static function getConnection()
+    {
+        // Получаем параметры подключения из файла
+        $paramsPath = ROOT . '/config/db_params.php';
+        $params = include($paramsPath);
+
+        // Устанавливаем соединение
+        $dsn = "mysql:host={$params['host']};dbname={$params['dbname']}";
+        $db = new PDO($dsn, $params['user'], $params['password']);
+
+        // Задаем кодировку
+        $db->exec("set names utf8");
+
+        date_default_timezone_set('Asia/Krasnoyarsk');
+
+        return $db;
+    }
+
+
+    // Выдает name по id
+    public static function getNameById($tableName, $id)
+    {
+        $db = self::getConnection();
+
+        $sql = "SELECT name FROM $tableName WHERE id = :id";
+
+
+        $result = $db->prepare($sql);
+        $result->bindParam(':id', $id, PDO::PARAM_INT);
+        $result->setFetchMode(PDO::FETCH_ASSOC);
+        $result->execute();
+
+        while ($row = $result->fetch()) {
+            return $row['name'];
+        }
+        return '';
+    }
+
+    // Выдает всё по id
+    public static function getById($tableName, $id)
+    {
+        $db = self::getConnection();
+
+        $sql = "SELECT * FROM $tableName WHERE id = :id";
+
+        $result = $db->prepare($sql);
+        $result->bindParam(':id', $id, PDO::PARAM_INT);
+        $result->setFetchMode(PDO::FETCH_ASSOC);
+        $result->execute();
+
+        while ($row = $result->fetch()) {
+            // if (empty($column)) {
+            //     return $row;
+            // }
+            return $row;
+        }
+        return 0;
+    }
+
+    // Выборка количества данных таблицы   
+    public static function getCount($tableName, $where = '')
+    {
+
+        $db = Db::getConnection();
+
+        $sql = "SELECT COUNT(*) FROM " . $tableName . ' ' . $where;
+
+        $result = $db->query($sql);
+        $countNum = $result->fetchColumn();
+
+        return $countNum;
+    }
+
+    public static function getColumnNames($tableName)
+    {
+        $db = self::getConnection();
+
+        $sql = "SHOW COLUMNS FROM $tableName";
+        $result = $db->prepare($sql);
+        $result->setFetchMode(PDO::FETCH_ASSOC);
+        $result->execute();
+        $list = array();
+        $i = 0;
+        while ($row = $result->fetch()) {
+            $list[$i] = $row;
+            $i++;
+        }
+        return $list;
+    }
+
+    //Получаем поля таблицы
+    public static function getFields($tableName)
+    {
+        $infoTable = self::getColumnNames($tableName);
+
+        $fields = [];
+
+        foreach ($infoTable as $key) {
+            $typeField = $key['Type'];
+            $nameField = $key['Field'];
+
+            $fields[$nameField]['name'] = $nameField;
+
+            switch ($typeField) {
+                case 'int(11)': {
+                        if (strpos($nameField, '_id')) {
+                            $fields[$nameField]['value'] = 0;
+                            $fields[$nameField]['type'] = 'sid';
+                            //$fields[$nameField]['table'] = str_replace("_id(.*)", "", $nameField);
+                            $tabName1 = explode("_", $nameField);
+                            $fields[$nameField]['table'] = $tabName1[0];
+                        } else {
+                            $fields[$nameField]['value'] = 0;
+                            $fields[$nameField]['type'] = 'i11';
+                        }
+                    };
+                    break;
+                case 'int(11) unsigned': {
+                        if (strpos($nameField, '_id')) {
+                            $fields[$nameField]['value'] = 0;
+                            $fields[$nameField]['type'] = 'sid';
+                            //$fields[$nameField]['table'] = str_replace("_id(.*)", "", $nameField);
+                            $tabName1 = explode("_", $nameField);
+                            $fields[$nameField]['table'] = $tabName1[0];
+                        } else {
+                            $fields[$nameField]['value'] = 0;
+                            $fields[$nameField]['type'] = 'i11';
+                        }
+                    };
+                    break;
+                case 'varchar(256)': {
+                        if ($nameField == 'foto') {
+                            $fields[$nameField]['value'] = '';
+                            $fields[$nameField]['type'] = 'f';
+                        } else {
+                            $fields[$nameField]['value'] = '';
+                            $fields[$nameField]['type'] = 'v256';
+                        }
+                    };
+                    break;
+                case 'text': {
+                        $fields[$nameField]['value'] = '';
+                        $fields[$nameField]['type'] = 't';
+                    };
+                    break;
+                case 'timestamp': {
+                        //$fields[$nameField]['value'] = date("Y-m-d H:i:s");
+                        $fields[$nameField]['type'] = 'd';
+                    };
+                    break;
+                case 'datetime': {
+                        //$fields[$nameField]['value'] = date("Y-m-d H:i:s");
+                        $fields[$nameField]['type'] = 'd';
+                    };
+                    break;
+                case 'decimal(15,2)': {
+                        $fields[$nameField]['value'] = 0;
+                        $fields[$nameField]['type'] = 'd152';
+                    };
+                    break;
+                case 'decimal(10,2)': {
+                        $fields[$nameField]['value'] = 0;
+                        $fields[$nameField]['type'] = 'd152';
+                    };
+                    break;
+                default: {
+                        $fields[$nameField]['value'] = '';
+                        $fields[$nameField]['type'] = 'v256';
+                    };
+                    break;
+            }
+            if ($nameField == 'foto' || $nameField == 'image') {
+                $fields[$nameField]['value'] = '';
+                $fields[$nameField]['type'] = 'f';
+            }
+        }
+
+        return $fields;
+    }
+
+    //Получаем поля таблицы
+    public static function getTypeFields($tableName, $field)
+    {
+        $infoTable = self::getColumnNames($tableName);
+
+        if (isset($infoTable[$field])) {
+            $typeField = $infoTable[$field]['Type'];
+            $typeV = "";
+            switch ($typeField) {
+                case 'int(11)': {
+                        if (strpos($field, '_id')) {
+                            $typeV = 'sid';
+                        } else {
+                            $typeV = 'i11';
+                        }
+                    };
+                    break;
+                case 'int(11) unsigned': {
+                        if (strpos($field, '_id')) {
+                            $typeV = 'sid';
+                        } else {
+                            $typeV = 'i11';
+                        }
+                    };
+                    break;
+                case 'varchar(256)': {
+                        if ($field == 'foto') {
+                            $typeV = 'f';
+                        } else {
+                            $typeV = 'v256';
+                        }
+                    };
+                    break;
+                case 'text': {
+                        $typeV = 't';
+                    };
+                    break;
+                case 'timestamp': {
+                        $typeV = 'd';
+                    };
+                    break;
+                case 'datetime': {
+                        $typeV = 'd';
+                    };
+                    break;
+                case 'decimal(15,2)': {
+                        $typeV = 'd152';
+                    };
+                    break;
+                case 'decimal(10,2)': {
+                        $typeV = 'd152';
+                    };
+                    break;
+                default: {
+                        $typeV = 'v256';
+                    };
+                    break;
+            }
+
+            return $typeV;
+        } else {
+            return false;
+        };
+    }
+
+    public static function getSQL($sql = [], $params = '')
+    {
+        // подключение к базе
+        $db = self::getConnection();
+
+        // подстановка текста запроса в коннект
+        if (is_array($sql)) {
+            foreach ($sql as $sqlElem) {
+                $result = $db->query($sqlElem);
+            }
+        } else {
+            $result = $db->prepare($sql);
+        };
+
+        // Устанавливаем параметры
+        if (is_array($params)) {
+            foreach ($params as $key => $value) {
+                $result->bindParam($key, $value);
+            }
+        }
+        $result->setFetchMode(PDO::FETCH_ASSOC);
+        $result->execute();
+
+        $list = [];
+        $i = 0;
+        while ($row = $result->fetch()) {
+            $list[$i] = $row;
+            $i++;
+        }
+        // if (empty($i)) {
+        //     $list = false;
+        // }
+        return $list;
+    }
+
+    //Обновляет данные табличной части из vjsona
+    public static function updateVJSON($table, $id, $vjson = '')
+    {
+        //удаляем все старые записи 
+        $sql = 'DELETE FROM ' . $table . "T WHERE " . $table . "_id = " . $id;
+
+        self::getSQL($sql);
+
+        //Создаем новые из джейсона
+        if (empty($vjson)) {
+            return true;
+        }
+
+        $list = json_decode($vjson, true);
+
+        foreach ($list as $vp) {
+
+            if (isset($vp['id'])) {
+                unset($vp['id']);
+            };
+
+            $vp[$table . "_id"]  = $id;
+
+            self::create($table . "T", $vp);
+        }
+
+        return true;
+    }
+
+
+    // $sqlNomen =  "SELECT 'Nomen' as tableName, Nom.id, Nom.name FROM nomen Nom WHERE (Nom.name LIKE '%" . $vFind . "%') OR (Nom.comment LIKE '%" . $vFind . "%')";
+    // $sqlCategory = "SELECT 'Category' as tableName, Cat.id, Cat.name FROM category Cat WHERE (Cat.name LIKE '%" . $vFind . "%')";
+    // $sql[] = "CREATE TEMPORARY TABLE vittemp " . $sqlNomen . " UNION ALL " . $sqlCategory;
+    // $sql[] = "SELECT * FROM vittemp ORDER BY name";
+    public static function getSQLPackage($sql = [], $otvet = true)
+    {
+        // подключение к базе
+        $db = self::getConnection();
+
+        // подстановка текста запроса в коннект
+        if (is_array($sql)) {
+            foreach ($sql as $sqlElem) {
+                $result = $db->query($sqlElem);
+                //self::log($sqlElem);
+            }
+        } else {
+            $result = $db->query($sql);
+        };
+
+        $result->setFetchMode(PDO::FETCH_ASSOC);
+
+        if ($otvet) {
+            $result->execute();
+
+            $list = array();
+            $i = 0;
+            while ($row = $result->fetch()) {
+                $list[$i] = $row;
+                $i++;
+            }
+            return $list;
+        } else {
+            return $result->execute();
+        }
+    }
+
+    /** Устанавливаем переменные в запрос
+     */
+    public static function set($value)
+    {
+        $set = '';
+        $operator = ',';
+        foreach ($value as $column => $val) {
+            if (!$set) {
+                $set = ' SET ' . $column . '=' . "'" . $val . "' ";
+            } else {
+                $set .= $operator . " " . $column . '=' . "'" . $val . "' ";
+            }
+        }
+
+        return $set;
+    }
+
+
+    /** Ведем Логи
+     */
+    public static function log($param)
+    {
+        $value['comment'] = $param;
+        $value['date'] = VFunc::vTimeNow();
+        self::createbased('logs', $value);
+    }
+
+    /** Ведем Логи по Задаче
+     */
+    public static function logTaskMessage($id, $param, $usersid = 1)
+    {
+        $paramOld = self::getById('task', $id);
+
+        $comment = "";
+        foreach ($paramOld as $key => $val) {
+
+            //Фиксируем только изменение статуса
+            if ($key == 'status') {
+                $comment .= " Статус: " . $param[$key] . "<br>";
+            }
+            // if (isset($param[$key])) {
+            //     //Сравнение дат
+            //     if ($key == 'date' or $key == 'datebegin' or $key == 'dateend' or $key == 'termbegin' or $key == 'termend') {
+
+            //         $strp = str_replace('T', ' ', $param[$key]);
+            //         $strv = substr($val, 0, -3);
+            //         //$strv = str_replace(':00', '', $val);
+            //         //$strv = $val;
+            //         if ($strp <> $strv) {
+            //             $comment .= " Изменено: " . $key . " Было: " . $strv . " Стало: " . $strp . "<br>";
+            //         }
+            //     } else {
+            //         if ($param[$key] <> $val) {
+            //             $comment .= " Изменено: " . $key . " Было: " . $val . " Стало: " . $param[$key] . "<br>";
+            //         };
+            //     };
+            // }
+        };
+
+        if (!empty($comment)) {
+            $vp['comment'] = $comment;
+            $vp['date'] = VFunc::vTimeNow();
+            $vp['users_id'] = $usersid;
+            $vp['fortable'] = 'task';
+            $vp['forid'] = $id;
+
+            self::createbased('message', $vp);
+        };
+        return true;
+    }
+
+    /** Создаём новую запись в таблицу<br/>
+     */
+    public static function create($tableName, $value, $from1C = false)
+    {
+        // Соединение с БД
+        $db = self::getConnection();
+        // Текст запроса к БД
+        $sql = 'INSERT ' . $tableName . self::set($value);
+        //self::log($sql);
+        //self::log("Создалось; " . $tableName . ' ----> ' . $sql);
+        // Получение и возврат результатов. Используется подготовленный запрос
+        $result = $db->prepare($sql);
+        //debug($sql);
+        if ($result->execute()) {
+            // Если запрос выполнен успешно, возвращаем id добавленной записи
+            $lastId = $db->lastInsertId();
+
+            //Db::log("Создалось; " . $tableName . ' ----> ' . $lastId);
+            if (!$from1C) {
+                self::setObmen($tableName, $lastId);
+            }
+
+            return $lastId;
+        }
+        // Иначе возвращаем 0
+        return 0;
+    }
+
+    /** Создаём новую запись в таблицу<br/>
+     */
+    public static function createbased($tableName, $value)
+    {
+        $db = self::getConnection();
+        $sql = 'INSERT ' . $tableName . self::set($value);
+        $result = $db->prepare($sql);
+        if ($result->execute()) {
+            $lastId = $db->lastInsertId();
+            return $lastId;
+        }
+        return true;
+    }
+
+    //обновляет запись в таблице
+    public static function update($tableName, $id, $value, $from1C = false)
+    {
+        //регистрируем для обмена
+        if (!$from1C) {
+            self::setObmen($tableName, $id);
+        }
+
+        // Соединение с БД
+        $db = self::getConnection();
+
+        // Текст запроса к БД
+        $sql = 'UPDATE ' . $tableName . self::set($value) . "WHERE id = :id";
+
+        // Получение и возврат результатов. Используется подготовленный запрос
+        $result = $db->prepare($sql);
+        $result->bindParam(':id', $id, PDO::PARAM_INT);
+        return $result->execute();
+    }
+
+    public static function delete($tableName, $id)
+    {
+        // Соединение с БД
+        $db = self::getConnection();
+
+        // Текст запроса к БД
+        $sql = 'DELETE FROM ' . $tableName . " WHERE id = :id";
+
+        // Получение и возврат результатов. Используется подготовленный запрос
+        $result = $db->prepare($sql);
+        $result->bindParam(':id', $id, PDO::PARAM_INT);
+        return $result->execute();
+    }
+
+
+    public static function deleteAll($tableName)
+    {
+        // Соединение с БД
+        $db = self::getConnection();
+
+        // Текст запроса к БД
+
+        $sql = 'DELETE FROM ' . $tableName;
+        //обнуляем счетчик
+        $sql .= "; ALTER TABLE " . $tableName . " AUTO_INCREMENT=1";
+        //Db::log($sql);
+        // Получение и возврат результатов. Используется подготовленный запрос
+        $result = $db->prepare($sql);
+        return $result->execute();
+    }
+
+    //Удаляем записи с таблицы Obmen
+    public static function deleteObmen($tableName)
+    {
+        // Соединение с БД
+        $db = self::getConnection();
+
+        // Текст запроса к БД
+
+        $sql = 'DELETE FROM obmen WHERE tablename = ' . $tableName;
+
+        //Db::log($sql);
+        // Получение и возврат результатов. Используется подготовленный запрос
+        $result = $db->prepare($sql);
+        return $result->execute();
+    }
+
+
+    //Регистрация записи для обмена   
+    public static function setObmen($tableName, $id)
+    {
+        if ($tableName == 'obmen') {
+            return true;
+        };
+
+        //Регистрируем только определенные таблицы
+        if (!(
+            ($tableName == 'users')
+            || ($tableName == 'products')
+            || ($tableName == 'productsColor')
+            || ($tableName == 'productsSize')
+            || ($tableName == 'cheque')
+            || ($tableName == 'storage')
+            || ($tableName == 'place')
+            || ($tableName == 'compositions')
+            || ($tableName == 'stocktaking'))) {
+            return true;
+        };
+
+        //из обмена берем все зарегистрированные ИЗМЕНЁННЫЕ записи таблицы
+
+        $sql = "SELECT * FROM obmen WHERE (tableid = " . $id . " AND tablename = '" . $tableName . "')";
+        $fr = self::getSQL($sql);
+        //self::log($sql);
+        if ($fr) {
+            return true;
+        };
+        //Если не найдено то Регистрируем;
+
+        $vr['tablename'] = $tableName;
+        $vr['tableid'] = $id;
+
+        self::createbased('obmen', $vr);
+
+        return true;
+    }
+
+    // Выборка всех записей по таблице Изменения для обмена   
+    public static function getObmen($tableName)
+    {
+        $ids = array();
+        $arr = array();
+        //Db::getConnectionRB();
+        //из обмена берем все зарегистрированные ИЗМЕНЁННЫЕ записи таблицы
+        $sql = "SELECT id,tableid FROM obmen WHERE tablename = :tablename";
+        $obm = self::getSQL($sql, ['tablename' => $tableName]);
+
+        //$obm = R::find('obmen', 'tablename = ?', [$tableName]);
+
+        if ($obm == []) {
+            return $ids;
+        }
+        //забираем только id
+
+        foreach ($obm as $key => $value) {
+            $ids[] = $value['tableid'];
+            //удаляем записи из обмена
+            self::delete('obmen', $value['id']);
+        };
+
+        //R::trashAll($obm);
+
+        //Забираем записи из таблицы по выборке
+        $sql = "SELECT * FROM " . $tableName . " WHERE id IN (" . implode(',', $ids) . ")";
+        $list = self::getSQL($sql);
+
+        //$list = R::find($tableName, 'id IN (' . R::genSlots($ids) . ')', $ids);
+        $i = 0;
+        foreach ($list as $value) {
+            foreach ($value as $key => $value2) {
+                $arr[$i][$key] = $value2;
+            };
+            $i++;
+        };
+        return $arr;
+    }
+
+    public static function getTables($baseName = '')
+    {
+        // Соединение с БД
+        $db = self::getConnection();
+        // Текст запроса к БД
+        if (empty($baseName)) {
+            $sql = 'SHOW TABLES';
+        } else {
+            $sql = 'SHOW TABLES FROM ' . $baseName;
+        }
+        $result = $db->prepare($sql);
+        $result->setFetchMode(PDO::FETCH_ASSOC);
+        $result->execute();
+        $list = array();
+        $i = 0;
+        while ($row = $result->fetch()) {
+            $list[$i] = $row;
+            $i++;
+        }
+        return $list;
+    }
+    public static function getColumns($tableName)
+    {
+        $db = self::getConnection();
+
+        $sql = "SHOW COLUMNS FROM $tableName";
+        $result = $db->prepare($sql);
+        $result->setFetchMode(PDO::FETCH_ASSOC);
+        $result->execute();
+        $list = array();
+        $i = 0;
+        while ($row = $result->fetch()) {
+            $list[$i] = $row;
+            $i++;
+        }
+        return $list;
+    }
+}
