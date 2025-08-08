@@ -333,8 +333,19 @@ class Obmen
         // Security::loginSite();
 
 
-        //МобильноеПриложение Авторизация
-        if (isset($sVit['mobileLogin'])) {
+         //тестовый запрос
+        if (isset($sVit['test'])) {
+           
+            // ! что пришло то и вернули!!!!
+            $findlist = $sVit['test'];
+
+            $str = json_encode($findlist, JSON_UNESCAPED_UNICODE);
+            echo $str;
+            return true;
+        };
+
+        //Авторизация
+        if (isset($sVit['Login'])) {
             if (!empty($sVit['mobileLogin'])) {
 
                 $vAuth = $sVit['mobileLogin'];
@@ -382,9 +393,6 @@ class Obmen
             echo $str;
             return true;
         };
-
-
-
 
         //2025 Получение свойства таблицы по айди
         if (isset($sVit['GetProperty'])) {
@@ -478,10 +486,7 @@ class Obmen
             return true;
         };
 
-
-
-
-        $str = "Нет данных 3";
+        $str = "Нет данных из BackEnda";
         echo $str;
         return true;
     }

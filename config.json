@@ -1,0 +1,7 @@
+{
+    
+    "host":"localhost",
+    "dbname":"vitdatabase",
+    "user":"root",
+    "password":""
+}

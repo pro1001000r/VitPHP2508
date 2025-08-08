@@ -10,8 +10,13 @@ class Db
     public static function getConnection()
     {
         // Получаем параметры подключения из файла
-        $paramsPath = ROOT . '/config/db_params.php';
-        $params = include($paramsPath);
+        //$paramsPath = ROOT . '/config/db_params.php';
+        //$params = include($paramsPath);
+
+        // * Якурнов 08 Август 2025 (пятница)
+        // * Получаем параметры подключения из файла
+        $json_file_content = file_get_contents(ROOT .'/config.json');
+        $params = json_decode($json_file_content, true);
 
         // Устанавливаем соединение
         $dsn = "mysql:host={$params['host']};dbname={$params['dbname']}";
@@ -20,7 +25,7 @@ class Db
         // Задаем кодировку
         $db->exec("set names utf8");
 
-        date_default_timezone_set('Asia/Krasnoyarsk');
+        //date_default_timezone_set('Asia/Krasnoyarsk');
 
         return $db;
     }
