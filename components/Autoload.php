@@ -18,7 +18,7 @@ spl_autoload_register(function ($class_name) {
         // Если такой файл существует, подключаем его
         if (is_file($path)) {
             include_once $path;
-        }
+        } 
     }
 
 });

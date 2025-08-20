@@ -1,6 +1,11 @@
 <?php
 
 header('Access-Control-Allow-Origin: *');
+// header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+// header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+
+
 
 class Obmen
 {
@@ -333,9 +338,9 @@ class Obmen
         // Security::loginSite();
 
 
-         //тестовый запрос
+        //тестовый запрос
         if (isset($sVit['test'])) {
-           
+
             // ! что пришло то и вернули!!!!
             $findlist = $sVit['test'];
 

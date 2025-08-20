@@ -34,7 +34,7 @@ class Router
             $segments = explode('/', $uri);
 
             //Удаляем vitphp
-            //array_shift($segments);
+            array_shift($segments);
 
             //VFunc::debug($segments);
 
