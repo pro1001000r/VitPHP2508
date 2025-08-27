@@ -330,24 +330,100 @@ class Obmen
 
         $strinput = file_get_contents('php://input');
 
-        //Декодируем
-        $sVit = json_decode($strinput, true);
-        $str = 'null';
+        //Декодируем и задаем начальные условия
+        $input = json_decode($strinput, true);
+
+        $output = [];
 
         //Авторизация
         // Security::loginSite();
 
+        if (isset($input['command'])) {
 
-        //тестовый запрос
-        if (isset($sVit['test'])) {
+            $data = $input['data'];
 
-            // ! что пришло то и вернули!!!!
-            $findlist = $sVit['test'];
+            switch ($input['command']) {
 
-            $str = json_encode($findlist, JSON_UNESCAPED_UNICODE);
-            echo $str;
-            return true;
+                case 'test': {
+                        // что пришло то и вернули!!!!
+                        $output = $input;
+                    };
+                    break;
+
+                //!!!!!!!!!!!!Одна из самых ГЛАВНЫХ функций!!!!!!!!!!!!!
+                //2025 CREATE добавление НОВОГО элемента таблицы 
+                case 'CreateTableItem': {
+
+                        $table = $data['tableName'];
+                        $vp = $data['vp'];
+
+                        $output = Db::create($table, $vp);
+                    };
+                    break;
+
+
+                ///2025 UPDATE Редактирование элемента таблицы по айди UPDATE
+                case 'UpdateTableById': {
+
+                        $id = $data['tableId'];
+                        $table = $data['tableName'];
+                        $vp = $data['vp'];
+
+                        Db::update($table, $id, $vp);
+                    };
+                    break;
+
+                case 'GetTableById': {
+
+                        $id = $data['tableId'];
+                        $table = $data['tableName'];
+
+                        $sql[] =  "SELECT * FROM " . $table  . " WHERE (id = " . $id  . ")";
+                        $output = Db::getSQLPackage($sql, true, true);
+                    };
+                    break;
+                case 'GetTable': {
+
+                        $table = $data['tableName'];
+
+                        $sql[] = "SELECT * FROM " . $data['tableName'] . " ORDER BY name";
+                        $output = Db::getSQLPackage($sql);
+                    };
+                    break;
+
+                case 'GetProperty': {
+
+                        $id = $data['tableId'];
+                        $table = $data['tableName'];
+                        $property = $data['property'];
+
+                        $sql[] =  "SELECT " . $property . " FROM " . $table  . " WHERE (id = " . $id  . ")";
+                        $findItem = Db::getSQLPackage($sql, true, true);
+
+                        if (count($findItem) > 0) {
+                            $output = $findItem[0][$property];
+                        } else {
+                            $output = '';
+                        };
+                    };
+                    break;
+
+                default: {
+                        $output = [];
+                    };
+                    break;
+            }
         };
+
+        // Кодируем обратно в строку и возвращаем!!!!!
+        $str = json_encode($output, JSON_UNESCAPED_UNICODE);
+        echo $str;
+        return true;
+
+        //. Здесь конец модуля *******************************************************************************
+
+
+
 
         //Авторизация
         if (isset($sVit['Login'])) {
@@ -378,121 +454,121 @@ class Obmen
             return true;
         };
 
-        //2025 Получить список таблицы по названию
-        if (isset($sVit['GetTable'])) {
-            $table = $sVit['GetTable'];
-            //$sqlNomen =  "SELECT * FROM '" . $table . " ORDER name";
+        // //2025 Получить список таблицы по названию
+        // if (isset($sVit['GetTable'])) {
+        //     $table = $sVit['GetTable'];
+        //     //$sqlNomen =  "SELECT * FROM '" . $table . " ORDER name";
 
-            // $sqlArray[] = "CREATE TEMPORARY TABLE vittemp " . $sqlNomen;
-            $sqlArray[] = "SELECT * FROM " . $table . " ORDER BY name";
+        //     // $sqlArray[] = "CREATE TEMPORARY TABLE vittemp " . $sqlNomen;
+        //     $sqlArray[] = "SELECT * FROM " . $table . " ORDER BY name";
 
-            $findlist1 = Db::getSQLPackage($sqlArray);
+        //     $findlist1 = Db::getSQLPackage($sqlArray);
 
-            if (count($findlist1) > 0) {
-                $findlist = $findlist1;
-            } else {
-                $findlist = [];
-            };
+        //     if (count($findlist1) > 0) {
+        //         $findlist = $findlist1;
+        //     } else {
+        //         $findlist = [];
+        //     };
 
-            $str = json_encode($findlist, JSON_UNESCAPED_UNICODE);
-            echo $str;
-            return true;
-        };
+        //     $str = json_encode($findlist, JSON_UNESCAPED_UNICODE);
+        //     echo $str;
+        //     return true;
+        // };
 
-        //2025 Получение свойства таблицы по айди
-        if (isset($sVit['GetProperty'])) {
-            if (!empty($sVit['GetProperty'])) {
+        // //2025 Получение свойства таблицы по айди
+        // if (isset($sVit['GetProperty'])) {
+        //     if (!empty($sVit['GetProperty'])) {
 
-                $vTab = $sVit['GetProperty'];
+        //         $vTab = $sVit['GetProperty'];
 
-                $sqlArray[] =  "SELECT " . $vTab['property']  . " FROM " . $vTab['table']  . " WHERE (id = " . $vTab['id']  . ")";
+        //         $sqlArray[] =  "SELECT " . $vTab['property']  . " FROM " . $vTab['table']  . " WHERE (id = " . $vTab['id']  . ")";
 
-                $findUser = Db::getSQLPackage($sqlArray);
+        //         $findUser = Db::getSQLPackage($sqlArray);
 
-                if (count($findUser) > 0) {
-                    $findlist = $findUser[0][$vTab['property']];
-                    //$findlist = "tcnm";
-                } else {
-                    $findlist = null;
-                };
-            } else {
-                $findlist = null;
-            }
-            $str = json_encode($findlist, JSON_UNESCAPED_UNICODE);
-            echo $str;
-            return true;
-        };
+        //         if (count($findUser) > 0) {
+        //             $findlist = $findUser[0][$vTab['property']];
+        //             //$findlist = "tcnm";
+        //         } else {
+        //             $findlist = null;
+        //         };
+        //     } else {
+        //         $findlist = null;
+        //     }
+        //     $str = json_encode($findlist, JSON_UNESCAPED_UNICODE);
+        //     echo $str;
+        //     return true;
+        // };
 
-        //2025 SELECT Получение элемента таблицы по айди SELECT
-        if (isset($sVit['GetTableById'])) {
-            if (!empty($sVit['GetTableById'])) {
+        // //2025 SELECT Получение элемента таблицы по айди SELECT
+        // if (isset($sVit['GetTableById'])) {
+        //     if (!empty($sVit['GetTableById'])) {
 
-                $vTab = $sVit['GetTableById'];
+        //         $vTab = $sVit['GetTableById'];
 
-                $sqlArray[] =  "SELECT * FROM " . $vTab['tableName']  . " WHERE (id = " . $vTab['tableId']  . ")";
+        //         $sqlArray[] =  "SELECT * FROM " . $vTab['tableName']  . " WHERE (id = " . $vTab['tableId']  . ")";
 
-                $findItem = Db::getSQLPackage($sqlArray);
+        //         $findItem = Db::getSQLPackage($sqlArray);
 
-                if (count($findItem) > 0) {
-                    $findlist = $findItem[0];
-                } else {
-                    $findlist = null;
-                };
-            } else {
-                $findlist = null;
-            }
-            $str = json_encode($findlist, JSON_UNESCAPED_UNICODE);
-            echo $str;
-            return true;
-        };
+        //         if (count($findItem) > 0) {
+        //             $findlist = $findItem[0];
+        //         } else {
+        //             $findlist = null;
+        //         };
+        //     } else {
+        //         $findlist = null;
+        //     }
+        //     $str = json_encode($findlist, JSON_UNESCAPED_UNICODE);
+        //     echo $str;
+        //     return true;
+        // };
 
-        //2025 UPDATE Редактирование элемента таблицы по айди UPDATE
-        if (isset($sVit['UpdateTableById'])) {
-            if (!empty($sVit['UpdateTableById'])) {
-                //обновляем
+        // //2025 UPDATE Редактирование элемента таблицы по айди UPDATE
+        // if (isset($sVit['UpdateTableById'])) {
+        //     if (!empty($sVit['UpdateTableById'])) {
+        //         //обновляем
 
-                $struct = $sVit['UpdateTableById'];
+        //         $struct = $sVit['UpdateTableById'];
 
-                $id = $struct['tableId'];
-                $table = $struct['tableName'];
-                $vp = $struct['vp'];
+        //         $id = $struct['tableId'];
+        //         $table = $struct['tableName'];
+        //         $vp = $struct['vp'];
 
-                //Выходим по пустому id
-                if (empty($id)) {
-                    echo json_encode('', JSON_UNESCAPED_UNICODE);
-                    return true;
-                }
+        //         //Выходим по пустому id
+        //         if (empty($id)) {
+        //             echo json_encode('', JSON_UNESCAPED_UNICODE);
+        //             return true;
+        //         }
 
-                Db::update($table, $id, $vp);
-            } else {
-            }
-            $str = json_encode('', JSON_UNESCAPED_UNICODE);
-            echo $str;
-            return true;
-        };
+        //         Db::update($table, $id, $vp);
+        //     } else {
+        //     }
+        //     $str = json_encode('', JSON_UNESCAPED_UNICODE);
+        //     echo $str;
+        //     return true;
+        // };
 
-        //!!!!!!!!!!!!Одна из самых ГЛАВНЫХ функций!!!!!!!!!!!!!
-        //2025 CREATE добавление НОВОГО элемента таблицы 
-        if (isset($sVit['CreateTableItem'])) {
-            if (!empty($sVit['CreateTableItem'])) {
-                //обновляем
+        // //!!!!!!!!!!!!Одна из самых ГЛАВНЫХ функций!!!!!!!!!!!!!
+        // //2025 CREATE добавление НОВОГО элемента таблицы 
+        // if (isset($sVit['CreateTableItem'])) {
+        //     if (!empty($sVit['CreateTableItem'])) {
+        //         //обновляем
 
-                $struct = $sVit['CreateTableItem'];
+        //         $struct = $sVit['CreateTableItem'];
 
 
-                $table = $struct['tableName'];
-                $vp = $struct['vp'];
+        //         $table = $struct['tableName'];
+        //         $vp = $struct['vp'];
 
-                Db::create($table, $vp);
-            } else {
-            }
-            $str = json_encode('', JSON_UNESCAPED_UNICODE);
-            echo $str;
-            return true;
-        };
+        //         Db::create($table, $vp);
+        //     } else {
+        //     }
+        //     $str = json_encode('', JSON_UNESCAPED_UNICODE);
+        //     echo $str;
+        //     return true;
+        // };
 
-        $str = "Нет данных из BackEnda";
-        echo $str;
-        return true;
+        // $str = "Нет данных из BackEnda";
+        // echo $str;
+        // return true;
     }
 }

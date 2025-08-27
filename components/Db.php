@@ -15,7 +15,7 @@ class Db
 
         // * Якурнов 08 Август 2025 (пятница)
         // * Получаем параметры подключения из файла
-        $json_file_content = file_get_contents(ROOT .'/config.json');
+        $json_file_content = file_get_contents(ROOT . '/config.json');
         $params = json_decode($json_file_content, true);
 
         // Устанавливаем соединение
@@ -326,7 +326,7 @@ class Db
     // $sqlCategory = "SELECT 'Category' as tableName, Cat.id, Cat.name FROM category Cat WHERE (Cat.name LIKE '%" . $vFind . "%')";
     // $sql[] = "CREATE TEMPORARY TABLE vittemp " . $sqlNomen . " UNION ALL " . $sqlCategory;
     // $sql[] = "SELECT * FROM vittemp ORDER BY name";
-    public static function getSQLPackage($sql = [], $otvet = true)
+    public static function getSQLPackage($sql = [], $otvet = true, $isitem = false)
     {
         // подключение к базе
         $db = self::getConnection();
@@ -352,6 +352,13 @@ class Db
                 $list[$i] = $row;
                 $i++;
             }
+
+            if ($isitem) {
+                if (count($list) > 0) {
+                    $list = $list[0];
+                };
+            }
+
             return $list;
         } else {
             return $result->execute();
