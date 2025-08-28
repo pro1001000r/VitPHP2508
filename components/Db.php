@@ -346,6 +346,10 @@ class Db
         if ($otvet) {
             $result->execute();
 
+            if ($isitem) {
+                return $result->fetch();
+            }
+
             $list = array();
             $i = 0;
             while ($row = $result->fetch()) {
@@ -353,11 +357,11 @@ class Db
                 $i++;
             }
 
-            if ($isitem) {
-                if (count($list) > 0) {
-                    $list = $list[0];
-                };
-            }
+            // if ($isitem) {
+            //     if (count($list) > 0) {
+            //         return $list[0];
+            //     };
+            // }
 
             return $list;
         } else {

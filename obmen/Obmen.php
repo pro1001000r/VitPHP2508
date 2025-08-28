@@ -400,8 +400,8 @@ class Obmen
                         $sql[] =  "SELECT " . $property . " FROM " . $table  . " WHERE (id = " . $id  . ")";
                         $findItem = Db::getSQLPackage($sql, true, true);
 
-                        if (count($findItem) > 0) {
-                            $output = $findItem[0][$property];
+                        if (isset($findItem[$property])) {
+                            $output = $findItem[$property];
                         } else {
                             $output = '';
                         };
