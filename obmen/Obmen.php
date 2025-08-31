@@ -372,6 +372,16 @@ class Obmen
                         Db::update($table, $id, $vp);
                     };
                     break;
+                //!!!!!!!!!!!!Одна из самых ГЛАВНЫХ функций!!!!!!!!!!!!!
+                ///2025 Удаление элемента таблицы по айди Delete
+                case 'DeleteTableById': {
+
+                        $id = $data['tableId'];
+                        $table = $data['tableName'];
+
+                        Db::delete($table, $id);
+                    };
+                    break;
 
                 case 'GetTableById': {
 
