@@ -435,150 +435,88 @@ class Obmen
 
 
 
-        //Авторизация
-        if (isset($sVit['Login'])) {
-            if (!empty($sVit['mobileLogin'])) {
+        // //Авторизация
+        // if (isset($sVit['Login'])) {
+        //     if (!empty($sVit['mobileLogin'])) {
 
-                $vAuth = $sVit['mobileLogin'];
-                if (!empty($vAuth['login']) && !empty($vAuth['password'])) {
+        //         $vAuth = $sVit['mobileLogin'];
+        //         if (!empty($vAuth['login']) && !empty($vAuth['password'])) {
 
-                    $sql =  "SELECT * FROM users 
-                    WHERE (users.active = 1 
-                    AND users.login  = '" . $vAuth['login']  . "' 
-                    AND users.password  = '" . $vAuth['password']  . "' )";
-                    $findUser = Db::getSQLPackage($sql);
+        //             $sql =  "SELECT * FROM users 
+        //             WHERE (users.active = 1 
+        //             AND users.login  = '" . $vAuth['login']  . "' 
+        //             AND users.password  = '" . $vAuth['password']  . "' )";
+        //             $findUser = Db::getSQLPackage($sql);
 
-                    if (count($findUser) > 0) {
-                        $findlist = $findUser[0];
-                    } else {
-                        $findlist = null;
-                    };
-                } else {
-                    $findlist = null;
-                };
-            } else {
-                $findlist = null;
+        //             if (count($findUser) > 0) {
+        //                 $findlist = $findUser[0];
+        //             } else {
+        //                 $findlist = null;
+        //             };
+        //         } else {
+        //             $findlist = null;
+        //         };
+        //     } else {
+        //         $findlist = null;
+        //     }
+        //     $str = json_encode($findlist, JSON_UNESCAPED_UNICODE);
+        //     echo $str;
+        //     return true;
+        // };
+
+       
+    }
+
+    //Работа с фото
+    public static function actionFoto()
+    {
+        if ($_POST['operation'] == "UploadImage") {
+
+            $tablename = $_POST['tableName'];
+            $tableid = $_POST['tableId'];
+
+            if ($tableid == 0) {
+                echo "Сохраните запись";
+                return true;
             }
-            $str = json_encode($findlist, JSON_UNESCAPED_UNICODE);
-            echo $str;
-            return true;
-        };
 
-        // //2025 Получить список таблицы по названию
-        // if (isset($sVit['GetTable'])) {
-        //     $table = $sVit['GetTable'];
-        //     //$sqlNomen =  "SELECT * FROM '" . $table . " ORDER name";
+            $input_name = 'file';
+            $files = array();
+            $diff = count($_FILES[$input_name]) - count($_FILES[$input_name], COUNT_RECURSIVE);
+            if ($diff == 0) {
+                $files = array($_FILES[$input_name]);
+            } else {
+                foreach ($_FILES[$input_name] as $k => $l) {
+                    foreach ($l as $i => $v) {
+                        $files[$i][$k] = $v;
+                    }
+                }
+            }
+            $chet = 1;
+            foreach ($files as $file1) {
 
-        //     // $sqlArray[] = "CREATE TEMPORARY TABLE vittemp " . $sqlNomen;
-        //     $sqlArray[] = "SELECT * FROM " . $table . " ORDER BY name";
+                $value = [];
+                $value['tablename'] = $tablename;
+                $value['tableid'] = $tableid;
+                $fotoarray = VFoto::setImage($tablename, $tableid, $file1, 0, $chet);
+                if (!empty($fotoarray)) {
+                    $value['foto'] = $fotoarray[0];
+                    $value['foto64'] = $fotoarray[1];
+                    if ($chet == 1) {
+                        $fotoUpdate['foto'] = $fotoarray[0];
+                        Db::update($tablename, $tableid, $fotoUpdate);
+                    }
+                }
+                $id = Db::create('fotos', $value);
+                $chet++;
+            }
+            echo "Фото сохранено";
+        }
 
-        //     $findlist1 = Db::getSQLPackage($sqlArray);
+        // $operation = $_POST['operation'];
+        // echo "обмен с фото прошел успешно ".$operation;
 
-        //     if (count($findlist1) > 0) {
-        //         $findlist = $findlist1;
-        //     } else {
-        //         $findlist = [];
-        //     };
+        return true;
 
-        //     $str = json_encode($findlist, JSON_UNESCAPED_UNICODE);
-        //     echo $str;
-        //     return true;
-        // };
-
-        // //2025 Получение свойства таблицы по айди
-        // if (isset($sVit['GetProperty'])) {
-        //     if (!empty($sVit['GetProperty'])) {
-
-        //         $vTab = $sVit['GetProperty'];
-
-        //         $sqlArray[] =  "SELECT " . $vTab['property']  . " FROM " . $vTab['table']  . " WHERE (id = " . $vTab['id']  . ")";
-
-        //         $findUser = Db::getSQLPackage($sqlArray);
-
-        //         if (count($findUser) > 0) {
-        //             $findlist = $findUser[0][$vTab['property']];
-        //             //$findlist = "tcnm";
-        //         } else {
-        //             $findlist = null;
-        //         };
-        //     } else {
-        //         $findlist = null;
-        //     }
-        //     $str = json_encode($findlist, JSON_UNESCAPED_UNICODE);
-        //     echo $str;
-        //     return true;
-        // };
-
-        // //2025 SELECT Получение элемента таблицы по айди SELECT
-        // if (isset($sVit['GetTableById'])) {
-        //     if (!empty($sVit['GetTableById'])) {
-
-        //         $vTab = $sVit['GetTableById'];
-
-        //         $sqlArray[] =  "SELECT * FROM " . $vTab['tableName']  . " WHERE (id = " . $vTab['tableId']  . ")";
-
-        //         $findItem = Db::getSQLPackage($sqlArray);
-
-        //         if (count($findItem) > 0) {
-        //             $findlist = $findItem[0];
-        //         } else {
-        //             $findlist = null;
-        //         };
-        //     } else {
-        //         $findlist = null;
-        //     }
-        //     $str = json_encode($findlist, JSON_UNESCAPED_UNICODE);
-        //     echo $str;
-        //     return true;
-        // };
-
-        // //2025 UPDATE Редактирование элемента таблицы по айди UPDATE
-        // if (isset($sVit['UpdateTableById'])) {
-        //     if (!empty($sVit['UpdateTableById'])) {
-        //         //обновляем
-
-        //         $struct = $sVit['UpdateTableById'];
-
-        //         $id = $struct['tableId'];
-        //         $table = $struct['tableName'];
-        //         $vp = $struct['vp'];
-
-        //         //Выходим по пустому id
-        //         if (empty($id)) {
-        //             echo json_encode('', JSON_UNESCAPED_UNICODE);
-        //             return true;
-        //         }
-
-        //         Db::update($table, $id, $vp);
-        //     } else {
-        //     }
-        //     $str = json_encode('', JSON_UNESCAPED_UNICODE);
-        //     echo $str;
-        //     return true;
-        // };
-
-        // //!!!!!!!!!!!!Одна из самых ГЛАВНЫХ функций!!!!!!!!!!!!!
-        // //2025 CREATE добавление НОВОГО элемента таблицы 
-        // if (isset($sVit['CreateTableItem'])) {
-        //     if (!empty($sVit['CreateTableItem'])) {
-        //         //обновляем
-
-        //         $struct = $sVit['CreateTableItem'];
-
-
-        //         $table = $struct['tableName'];
-        //         $vp = $struct['vp'];
-
-        //         Db::create($table, $vp);
-        //     } else {
-        //     }
-        //     $str = json_encode('', JSON_UNESCAPED_UNICODE);
-        //     echo $str;
-        //     return true;
-        // };
-
-        // $str = "Нет данных из BackEnda";
-        // echo $str;
-        // return true;
     }
 }
