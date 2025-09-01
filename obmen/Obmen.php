@@ -418,6 +418,15 @@ class Obmen
                     };
                     break;
 
+                case 'GetFotos': {
+
+                        $id = $data['tableId'];
+                        $table = $data['tableName'];
+
+                        $output = VFoto::getImage($table, $id);
+                    };
+                    break;
+
                 default: {
                         $output = [];
                     };
@@ -464,7 +473,7 @@ class Obmen
         //     return true;
         // };
 
-       
+
     }
 
     //Работа с фото
@@ -517,6 +526,5 @@ class Obmen
         // echo "обмен с фото прошел успешно ".$operation;
 
         return true;
-
     }
 }
