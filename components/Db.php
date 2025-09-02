@@ -3,8 +3,7 @@
 class Db
 {
     /**
-     * Устанавливает соединение с базой данных
-     * @return \PDO <p>Объект класса PDO для работы с БД</p>
+     * 2025 Устанавливает соединение с базой данных
      */
 
     public static function getConnection()
@@ -30,26 +29,6 @@ class Db
         return $db;
     }
 
-
-    // Выдает name по id
-    public static function getNameById($tableName, $id)
-    {
-        $db = self::getConnection();
-
-        $sql = "SELECT name FROM $tableName WHERE id = :id";
-
-
-        $result = $db->prepare($sql);
-        $result->bindParam(':id', $id, PDO::PARAM_INT);
-        $result->setFetchMode(PDO::FETCH_ASSOC);
-        $result->execute();
-
-        while ($row = $result->fetch()) {
-            return $row['name'];
-        }
-        return '';
-    }
-
     // Выдает всё по id
     public static function getById($tableName, $id)
     {
@@ -69,192 +48,6 @@ class Db
             return $row;
         }
         return 0;
-    }
-
-    // Выборка количества данных таблицы   
-    public static function getCount($tableName, $where = '')
-    {
-
-        $db = Db::getConnection();
-
-        $sql = "SELECT COUNT(*) FROM " . $tableName . ' ' . $where;
-
-        $result = $db->query($sql);
-        $countNum = $result->fetchColumn();
-
-        return $countNum;
-    }
-
-    public static function getColumnNames($tableName)
-    {
-        $db = self::getConnection();
-
-        $sql = "SHOW COLUMNS FROM $tableName";
-        $result = $db->prepare($sql);
-        $result->setFetchMode(PDO::FETCH_ASSOC);
-        $result->execute();
-        $list = array();
-        $i = 0;
-        while ($row = $result->fetch()) {
-            $list[$i] = $row;
-            $i++;
-        }
-        return $list;
-    }
-
-    //Получаем поля таблицы
-    public static function getFields($tableName)
-    {
-        $infoTable = self::getColumnNames($tableName);
-
-        $fields = [];
-
-        foreach ($infoTable as $key) {
-            $typeField = $key['Type'];
-            $nameField = $key['Field'];
-
-            $fields[$nameField]['name'] = $nameField;
-
-            switch ($typeField) {
-                case 'int(11)': {
-                        if (strpos($nameField, '_id')) {
-                            $fields[$nameField]['value'] = 0;
-                            $fields[$nameField]['type'] = 'sid';
-                            //$fields[$nameField]['table'] = str_replace("_id(.*)", "", $nameField);
-                            $tabName1 = explode("_", $nameField);
-                            $fields[$nameField]['table'] = $tabName1[0];
-                        } else {
-                            $fields[$nameField]['value'] = 0;
-                            $fields[$nameField]['type'] = 'i11';
-                        }
-                    };
-                    break;
-                case 'int(11) unsigned': {
-                        if (strpos($nameField, '_id')) {
-                            $fields[$nameField]['value'] = 0;
-                            $fields[$nameField]['type'] = 'sid';
-                            //$fields[$nameField]['table'] = str_replace("_id(.*)", "", $nameField);
-                            $tabName1 = explode("_", $nameField);
-                            $fields[$nameField]['table'] = $tabName1[0];
-                        } else {
-                            $fields[$nameField]['value'] = 0;
-                            $fields[$nameField]['type'] = 'i11';
-                        }
-                    };
-                    break;
-                case 'varchar(256)': {
-                        if ($nameField == 'foto') {
-                            $fields[$nameField]['value'] = '';
-                            $fields[$nameField]['type'] = 'f';
-                        } else {
-                            $fields[$nameField]['value'] = '';
-                            $fields[$nameField]['type'] = 'v256';
-                        }
-                    };
-                    break;
-                case 'text': {
-                        $fields[$nameField]['value'] = '';
-                        $fields[$nameField]['type'] = 't';
-                    };
-                    break;
-                case 'timestamp': {
-                        //$fields[$nameField]['value'] = date("Y-m-d H:i:s");
-                        $fields[$nameField]['type'] = 'd';
-                    };
-                    break;
-                case 'datetime': {
-                        //$fields[$nameField]['value'] = date("Y-m-d H:i:s");
-                        $fields[$nameField]['type'] = 'd';
-                    };
-                    break;
-                case 'decimal(15,2)': {
-                        $fields[$nameField]['value'] = 0;
-                        $fields[$nameField]['type'] = 'd152';
-                    };
-                    break;
-                case 'decimal(10,2)': {
-                        $fields[$nameField]['value'] = 0;
-                        $fields[$nameField]['type'] = 'd152';
-                    };
-                    break;
-                default: {
-                        $fields[$nameField]['value'] = '';
-                        $fields[$nameField]['type'] = 'v256';
-                    };
-                    break;
-            }
-            if ($nameField == 'foto' || $nameField == 'image') {
-                $fields[$nameField]['value'] = '';
-                $fields[$nameField]['type'] = 'f';
-            }
-        }
-
-        return $fields;
-    }
-
-    //Получаем поля таблицы
-    public static function getTypeFields($tableName, $field)
-    {
-        $infoTable = self::getColumnNames($tableName);
-
-        if (isset($infoTable[$field])) {
-            $typeField = $infoTable[$field]['Type'];
-            $typeV = "";
-            switch ($typeField) {
-                case 'int(11)': {
-                        if (strpos($field, '_id')) {
-                            $typeV = 'sid';
-                        } else {
-                            $typeV = 'i11';
-                        }
-                    };
-                    break;
-                case 'int(11) unsigned': {
-                        if (strpos($field, '_id')) {
-                            $typeV = 'sid';
-                        } else {
-                            $typeV = 'i11';
-                        }
-                    };
-                    break;
-                case 'varchar(256)': {
-                        if ($field == 'foto') {
-                            $typeV = 'f';
-                        } else {
-                            $typeV = 'v256';
-                        }
-                    };
-                    break;
-                case 'text': {
-                        $typeV = 't';
-                    };
-                    break;
-                case 'timestamp': {
-                        $typeV = 'd';
-                    };
-                    break;
-                case 'datetime': {
-                        $typeV = 'd';
-                    };
-                    break;
-                case 'decimal(15,2)': {
-                        $typeV = 'd152';
-                    };
-                    break;
-                case 'decimal(10,2)': {
-                        $typeV = 'd152';
-                    };
-                    break;
-                default: {
-                        $typeV = 'v256';
-                    };
-                    break;
-            }
-
-            return $typeV;
-        } else {
-            return false;
-        };
     }
 
     public static function getSQL($sql = [], $params = '')
@@ -386,7 +179,6 @@ class Db
         return $set;
     }
 
-
     /** Ведем Логи
      */
     public static function log($param)
@@ -394,50 +186,6 @@ class Db
         $value['comment'] = $param;
         $value['date'] = VFunc::vTimeNow();
         self::createbased('logs', $value);
-    }
-
-    /** Ведем Логи по Задаче
-     */
-    public static function logTaskMessage($id, $param, $usersid = 1)
-    {
-        $paramOld = self::getById('task', $id);
-
-        $comment = "";
-        foreach ($paramOld as $key => $val) {
-
-            //Фиксируем только изменение статуса
-            if ($key == 'status') {
-                $comment .= " Статус: " . $param[$key] . "<br>";
-            }
-            // if (isset($param[$key])) {
-            //     //Сравнение дат
-            //     if ($key == 'date' or $key == 'datebegin' or $key == 'dateend' or $key == 'termbegin' or $key == 'termend') {
-
-            //         $strp = str_replace('T', ' ', $param[$key]);
-            //         $strv = substr($val, 0, -3);
-            //         //$strv = str_replace(':00', '', $val);
-            //         //$strv = $val;
-            //         if ($strp <> $strv) {
-            //             $comment .= " Изменено: " . $key . " Было: " . $strv . " Стало: " . $strp . "<br>";
-            //         }
-            //     } else {
-            //         if ($param[$key] <> $val) {
-            //             $comment .= " Изменено: " . $key . " Было: " . $val . " Стало: " . $param[$key] . "<br>";
-            //         };
-            //     };
-            // }
-        };
-
-        if (!empty($comment)) {
-            $vp['comment'] = $comment;
-            $vp['date'] = VFunc::vTimeNow();
-            $vp['users_id'] = $usersid;
-            $vp['fortable'] = 'task';
-            $vp['forid'] = $id;
-
-            self::createbased('message', $vp);
-        };
-        return true;
     }
 
     /** Создаём новую запись в таблицу<br/>

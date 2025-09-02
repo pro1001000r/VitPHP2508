@@ -350,7 +350,7 @@ class Obmen
                     };
                     break;
 
-                //!!!!!!!!!!!!Одна из самых ГЛАВНЫХ функций!!!!!!!!!!!!!
+                //!!!!!!!!!!!!Первая из самых ГЛАВНЫХ функций!!!!!!!!!!!!!
                 //2025 CREATE добавление НОВОГО элемента таблицы 
                 case 'CreateTableItem': {
 
@@ -372,14 +372,21 @@ class Obmen
                         Db::update($table, $id, $vp);
                     };
                     break;
-                //!!!!!!!!!!!!Одна из самых ГЛАВНЫХ функций!!!!!!!!!!!!!
+                //!!!!!!!!!!!!Вторая из самых ГЛАВНЫХ функций!!!!!!!!!!!!!
                 ///2025 Удаление элемента таблицы по айди Delete
                 case 'DeleteTableById': {
 
                         $id = $data['tableId'];
                         $table = $data['tableName'];
 
+                        VFoto::deleteImage($table, $id);
+
                         Db::delete($table, $id);
+                    };
+                    break;
+                case 'DeleteFotosById': {
+                        $id = $data['tableId'];
+                        VFoto::deleteImageById($id);
                     };
                     break;
 

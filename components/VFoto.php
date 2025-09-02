@@ -105,22 +105,41 @@ class VFoto
     //     return $nameImg;
     // }
 
-    //Удаляет фото привязанные к данному элементу
+    //2025 Удаляет запись из fotos и фото привязанные к ней
+    public static function deleteImageById($id)
+    {
+
+        $tableName = 'fotos';
+
+        $item = Db::getById($tableName, $id);
+        if (isset($item)) {
+            // * Удаляем сами фото                
+            $foto = $item['foto'];
+            if (!empty($foto)) {
+                $foto = ROOT . $foto;
+                if (file_exists($foto)) {
+                    unlink($foto);
+                }
+            }
+            $foto64 = $item['foto64'];
+            if (!empty($foto64)) {
+                $foto64 = ROOT . $foto64;
+                if (file_exists($foto64)) {
+                    unlink($foto64);
+                }
+            }
+            // * Удаляем запись 
+            Db::delete($tableName, $id);
+        }
+    }
+
+    // нужен рефакторинг!!! Удаляет фото привязанные к данному элементу
     public static function deleteImage($tableName, $id)
     {
-        $oldfoto = Db::getById($tableName, $id, 'foto');
-        if (isset($oldfoto)) {
-            $filename = ROOT . $oldfoto;
-            if (file_exists($filename)) {
-                unlink($filename);
-            }
-        }
-        $oldfotoFull = Db::getById($tableName, $id, 'foto64');
-        if (isset($oldfotoFull)) {
-            $filename2 = ROOT . $oldfotoFull;
-            if (file_exists($filename2)) {
-                unlink($filename2);
-            }
+        $sql = "SELECT id FROM fotos WHERE (tableid = " . $id . " AND tablename = '" . $tableName . "')";
+        $listid = Db::getSQL($sql);
+        foreach ($listid as $value) {
+            self::deleteImageById($value['id']);
         }
     }
 
