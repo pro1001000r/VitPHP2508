@@ -11,6 +11,7 @@ class VBarcode
         $findItem = Db::getSQLPackage($sqlArray);
 
         $findid['free'] = false;
+
         $findid['products'] = [];
 
         if (count($findItem) > 0) {
@@ -117,28 +118,29 @@ class VBarcode
     public static function ListBarcodeProducts($products_id)
     {
 
-        $sqlbarcode = "SELECT DISTINCT
-            
-                B.products_id as products_id, 
-                B.id as id, 
-                B.name as barcode, 
-                P.article as article, 
-                P.name as productsname, 
-        
-                B.productsColor_id as productsColor_id, 
-                PColor.name as colorname, 
-        
-                B.productsSize_id as productsSize_id, 
-                PSize.name as sizename
-                
-                FROM barcode B
-                LEFT JOIN products P ON B.products_id = P.id
-                LEFT JOIN productsColor PColor ON B.productsColor_id = PColor.id
-                LEFT JOIN productsSize PSize ON B.productsSize_id = PSize.id 
-
-                WHERE ( products_id = " . $products_id . ")
-
-                ORDER BY productsname, colorname, sizename";
+        $sqlbarcode = "
+SELECT
+    DISTINCT B.products_id as products_id,
+    B.id as id,
+    B.name as barcode,
+    P.article as article,
+    P.name as productsname,
+    B.productsColor_id as productsColor_id,
+    PColor.name as colorname,
+    B.productsSize_id as productsSize_id,
+    PSize.name as sizename
+FROM
+    barcode B
+    LEFT JOIN products P ON B.products_id = P.id
+    LEFT JOIN productsColor PColor ON B.productsColor_id = PColor.id
+    LEFT JOIN productsSize PSize ON B.productsSize_id = PSize.id
+WHERE
+    (products_id = " . $products_id . ")
+ORDER BY
+    productsname,
+    colorname,
+    sizename
+    ";
 
         //Выбрали все штрихкоды из товара
         $findBarcode = Db::getSQLPackage($sqlbarcode);
