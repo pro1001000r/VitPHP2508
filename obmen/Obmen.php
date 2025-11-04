@@ -349,6 +349,21 @@ class Obmen
                         $output = $input;
                     };
                     break;
+                
+                //Авторизация
+                case 'Auth': {
+                        $login = $data['login'];
+                        $pass = $data['pass'];
+
+                        $sql =  "SELECT * FROM users 
+                    WHERE (users.active = 1 
+                    AND users.login  = '" . $login  . "' 
+                    AND users.password  = '" . $pass  . "' )";
+                        
+                    $output = Db::getSQLPackage($sql,true,true);
+                       
+                    };
+                    break;
 
                 //!!!!!!!!!!!!Первая из самых ГЛАВНЫХ функций!!!!!!!!!!!!!
                 //2025 CREATE добавление НОВОГО элемента таблицы 
