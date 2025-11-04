@@ -349,19 +349,26 @@ class Obmen
                         $output = $input;
                     };
                     break;
-                
+
+
+
                 //Авторизация
                 case 'Auth': {
                         $login = $data['login'];
                         $pass = $data['pass'];
 
-                        $sql =  "SELECT * FROM users 
+                        $sql[] =  "SELECT * FROM users 
                     WHERE (users.active = 1 
                     AND users.login  = '" . $login  . "' 
                     AND users.password  = '" . $pass  . "' )";
-                        
-                    $output = Db::getSQLPackage($sql,true,true);
-                       
+                        // Db::log($sql);
+                        $findUser = Db::getSQLPackage($sql);
+                        //Db::log('pfgbcm бля');
+                        if (count($findUser) > 0) {
+                            $output = $findUser[0];
+                        } else {
+                            $output = null;
+                        };
                     };
                     break;
 
