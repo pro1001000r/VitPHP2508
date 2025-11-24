@@ -9,33 +9,46 @@ class VStocktaking
         if (!empty($param['id'])) {
 
             // Если есть id
+            Db::log("Залетает " . $param['id']);
 
             $sqlArray[] =  "SELECT * FROM  stocktaking 
                     WHERE (stocktaking.id = " . $param['id'] . ")";
             $nomeninv = Db::getSQLPackage($sqlArray);
         } else {
 
+            
             //здесь ищем запись
+            $strWhere = '1=1';
+                        
+            if (isset($param['products_id'])) {
+                $strWhere = $strWhere . " AND (stocktaking.products_id = " . $param['products_id'] . ")";
+            };
+            if (isset($param['productsColor_id'])) {
+                $strWhere = $strWhere . " AND (stocktaking.productsColor_id = " . $param['productsColor_id'] . ")";
+            };
+            if (isset($param['productsSize_id'])) {
+                $strWhere = $strWhere . " AND (stocktaking.productsSize_id = " . $param['productsSize_id'] . ")";
+            };
+            if (isset($param['users_id'])) {
+                $strWhere = $strWhere . " AND (stocktaking.users_id = " . $param['users_id'] . ")";
+            };
+            if (isset($param['storage_id'])) {
+                $strWhere = $strWhere . " AND (stocktaking.storage_id = " . $param['storage_id'] . ")";
+            };
+            if (isset($param['place_id'])) {
+                $strWhere = $strWhere . " AND (stocktaking.place_id = " . $param['place_id'] . ")";
+            };
+            
+            $sqlArray[] =  "SELECT * FROM  stocktaking WHERE " . $strWhere;
 
-            $sqlArray[] =  "SELECT * FROM  stocktaking 
-                    WHERE (stocktaking.products_id = " . $param['productsId'] . ")
-                    AND (stocktaking.productsColor_id = " . $param['productsColorId'] . ")
-                    AND (stocktaking.productsSize_id = " . $param['productsSizeId'] . ")
-
-                    AND (stocktaking.users_id = " . $param['usersId'] . ")
-                    AND (stocktaking.storage_id = " . $param['storageId'] . ")
-                    AND (stocktaking.place_id = " . $param['placeId'] . ")";
             $nomeninv = Db::getSQLPackage($sqlArray);
         }
 
         if ($nomeninv != []) {
             $invred  = $nomeninv[0];
 
-            //     $vp['users_id'] =  $vTab['userid'];
             $vp['date'] = VFunc::vTimeNow();
             $vp['count'] =   $invred['count'] + $param['count'];
-            //     $vp['count'] =   $vTab['count'];
-            //     $vp['comment'] =  "Изменено";
 
             Db::update('stocktaking', $invred['id'], $vp);
 
@@ -46,13 +59,28 @@ class VStocktaking
 
             $vp['date'] = VFunc::vTimeNow();
 
-            $vp['users_id'] =  $param['usersId'];
-            $vp['storage_id'] =  $param['storageId'];
-            $vp['place_id'] =  $param['placeId'];
-            $vp['products_id'] =  $param['productsId'];
-            $vp['productsColor_id'] =  $param['productsColorId'];
-            $vp['productsSize_id'] =  $param['productsSizeId'];
-            $vp['count'] =  $param['count'];
+            if (isset($param['users_id'])) {
+                $vp['users_id'] =  $param['users_id'];
+            };
+            if (isset($param['storage_id'])) {
+                $vp['storage_id'] =  $param['storage_id'];
+            };
+            if (isset($param['place_id'])) {
+                $vp['place_id'] =  $param['place_id'];
+            };
+            if (isset($param['products_id'])) {
+                $vp['products_id'] =  $param['products_id'];
+            };
+            if (isset($param['productsColor_id'])) {
+                $vp['productsColor_id'] =  $param['productsColor_id'];
+            };
+            if (isset($param['productsSize_id'])) {
+                $vp['productsSize_id'] =  $param['productsSize_id'];
+            };
+            if (isset($param['count'])) {
+                $vp['count'] =  $param['count'];
+            };
+
             //$vp['comment'] =  "Первые пробные записи";
 
             Db::create('stocktaking', $vp);
@@ -121,7 +149,7 @@ class VStocktaking
             $sqlArray[] =  "SELECT * FROM vittemp WHERE ( " . $tableName . " = " . $tableId . " )";
         }
         $findlist1 = Db::getSQLPackage($sqlArray);
-        
+
         if (count($findlist1) > 0) {
             $findlist = $findlist1;
         } else {

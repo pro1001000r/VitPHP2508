@@ -447,6 +447,7 @@ class Obmen
                     };
                     break;
 
+                //Фото
                 case 'GetFotos': {
 
                         $id = $data['tableId'];
@@ -455,16 +456,22 @@ class Obmen
                         $output = VFoto::getImage($table, $id);
                     };
                     break;
-
-                case 'GetStocktaking2025': {
+                //Инвентаризация
+                case 'SetStocktaking': {
+                        $output = VStocktaking::CreateUpdate($data);
+                    };
+                    break;
+                case 'GetStocktaking': {
 
                         $id = $data['tableId'];
                         $table = $data['tableName'];
-                        
+
                         $output = VStocktaking::GetStocktaking($data);
                     };
                     break;
-                    default: {
+
+                //Штрихкод    
+                default: {
                         $output = [];
                     };
                     break;
