@@ -471,6 +471,11 @@ class Obmen
                     break;
 
                 //Штрихкод    
+                case 'GetProductByBarcode': {
+                        $output = VBarcode::Find($data);
+                    };
+                    break;
+
                 default: {
                         $output = [];
                     };
