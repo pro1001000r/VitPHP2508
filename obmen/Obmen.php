@@ -456,7 +456,15 @@ class Obmen
                     };
                     break;
 
-                default: {
+                case 'GetStocktaking2025': {
+
+                        $id = $data['tableId'];
+                        $table = $data['tableName'];
+                        
+                        $output = VStocktaking::GetStocktaking($data);
+                    };
+                    break;
+                    default: {
                         $output = [];
                     };
                     break;
