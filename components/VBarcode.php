@@ -22,6 +22,43 @@ class VBarcode
 
         return $findid;
     }
+
+    //Запись Нового штрихкода******************************************************************************
+    public static function CreateUpdate($param)
+    {
+        if (isset($param['barcode']) && isset($param['products_id'])) {
+            $barcode =  $param['barcode'];
+            $products_id = $param['products_id'];
+            $productsColor_id = null;
+            $productsSize_id = null;
+
+            if (isset($param['productsColor_id'])) {
+                $productsColor_id =  $param['productsColor_id'];
+            };
+            if (isset($param['productsSize_id'])) {
+                $productsSize_id =  $param['productsSize_id'];
+            };
+
+            $vp = [];
+            $vp['name'] = $barcode;
+            $vp['products_id'] = $products_id;
+            $vp['productsColor_id'] = $productsColor_id;
+            $vp['productsSize_id'] = $productsSize_id;
+
+            $fi = self::Find($barcode);
+
+            if (!$fi['errorScan']) {
+                if ($fi['products_id'] <> $products_id || $fi['productsColor_id'] <> $productsColor_id || $fi['productsSize_id'] <> $productsSize_id) {
+                    $findid = $fi['id'];
+                    Db::update('barcode', $findid, $vp); //Если есть обновляем
+                }
+                //Db::log('обновлено'.$findid);
+            } else {
+                Db::create('barcode', $vp); //Если нет то создаЁм
+                //Db::log('Добавлено'.$barcode);
+            };
+        };
+    }
     //Поиск по штрихкоду******************************************************************************
     public static function Find($barcode)
     {

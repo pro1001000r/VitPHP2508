@@ -16,10 +16,10 @@ class VStocktaking
             $nomeninv = Db::getSQLPackage($sqlArray);
         } else {
 
-            
+
             //здесь ищем запись
             $strWhere = '1=1';
-                        
+
             if (isset($param['products_id'])) {
                 $strWhere = $strWhere . " AND (stocktaking.products_id = " . $param['products_id'] . ")";
             };
@@ -38,18 +38,21 @@ class VStocktaking
             if (isset($param['place_id'])) {
                 $strWhere = $strWhere . " AND (stocktaking.place_id = " . $param['place_id'] . ")";
             };
-            
+
             $sqlArray[] =  "SELECT * FROM  stocktaking WHERE " . $strWhere;
 
             $nomeninv = Db::getSQLPackage($sqlArray);
         }
 
+        //Проверяем штрихкод
+        VBarcode::CreateUpdate($param);
+        
         if ($nomeninv != []) {
             $invred  = $nomeninv[0];
 
             $vp['date'] = VFunc::vTimeNow();
             $vp['count'] =   $invred['count'] + $param['count'];
-            $vp['barcode'] = $param['barcode'];//Надо подумать?
+            $vp['barcode'] = $param['barcode']; //Надо подумать?
 
             Db::update('stocktaking', $invred['id'], $vp);
 
