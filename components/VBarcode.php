@@ -51,12 +51,13 @@ class VBarcode
 
         $findItem = Db::getSQLPackage($sqlArray);
 
-        $findid = false;
+        $findid = [];
 
         if (count($findItem) > 0) {
             $findid = $findItem[0];
+            $findid['errorScan'] = false;
         } else {
-            $findid = false;
+            $findid['errorScan'] = true;
         };
 
         return $findid;
