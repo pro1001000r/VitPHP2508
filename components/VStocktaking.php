@@ -9,7 +9,7 @@ class VStocktaking
         if (!empty($param['id'])) {
 
             // Если есть id
-            Db::log("Залетает " . $param['id']);
+            //Db::log("Залетает " . $param['id']);
 
             $sqlArray[] =  "SELECT * FROM  stocktaking 
                     WHERE (stocktaking.id = " . $param['id'] . ")";
@@ -49,6 +49,7 @@ class VStocktaking
 
             $vp['date'] = VFunc::vTimeNow();
             $vp['count'] =   $invred['count'] + $param['count'];
+            $vp['barcode'] = $param['barcode'];//Надо подумать?
 
             Db::update('stocktaking', $invred['id'], $vp);
 
@@ -76,6 +77,9 @@ class VStocktaking
             };
             if (isset($param['productsSize_id'])) {
                 $vp['productsSize_id'] =  $param['productsSize_id'];
+            };
+            if (isset($param['barcode'])) {
+                $vp['barcode'] =  $param['barcode'];
             };
             if (isset($param['count'])) {
                 $vp['count'] =  $param['count'];
