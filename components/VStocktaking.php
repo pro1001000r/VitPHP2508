@@ -23,11 +23,16 @@ class VStocktaking
             if (isset($param['products_id'])) {
                 $strWhere = $strWhere . " AND (stocktaking.products_id = " . $param['products_id'] . ")";
             };
-            if (isset($param['productsColor_id'])) {
+
+            if (isset($param['productsColor_id']) && $param['productsColor_id'] <> 0) {
                 $strWhere = $strWhere . " AND (stocktaking.productsColor_id = " . $param['productsColor_id'] . ")";
+            } else {
+                $strWhere = $strWhere . " AND (stocktaking.productsColor_id IS NULL)";
             };
-            if (isset($param['productsSize_id'])) {
+            if (isset($param['productsSize_id']) && $param['productsSize_id'] <> 0) {
                 $strWhere = $strWhere . " AND (stocktaking.productsSize_id = " . $param['productsSize_id'] . ")";
+            } else {
+                $strWhere = $strWhere . " AND (stocktaking.productsSize_id IS NULL)";
             };
             if (isset($param['users_id'])) {
                 $strWhere = $strWhere . " AND (stocktaking.users_id = " . $param['users_id'] . ")";
@@ -35,8 +40,10 @@ class VStocktaking
             if (isset($param['storage_id'])) {
                 $strWhere = $strWhere . " AND (stocktaking.storage_id = " . $param['storage_id'] . ")";
             };
-            if (isset($param['place_id'])) {
+            if (isset($param['place_id']) && $param['place_id'] <> 0) {
                 $strWhere = $strWhere . " AND (stocktaking.place_id = " . $param['place_id'] . ")";
+            } else {
+                $strWhere = $strWhere . " AND (stocktaking.place_id IS NULL)";
             };
 
             $sqlArray[] =  "SELECT * FROM  stocktaking WHERE " . $strWhere;

@@ -32,10 +32,10 @@ class VBarcode
             $productsColor_id = null;
             $productsSize_id = null;
 
-            if (isset($param['productsColor_id'])) {
+            if (isset($param['productsColor_id']) && $param['productsColor_id'] <> 0) {
                 $productsColor_id =  $param['productsColor_id'];
             };
-            if (isset($param['productsSize_id'])) {
+            if (isset($param['productsSize_id']) && $param['productsSize_id'] <> 0) {
                 $productsSize_id =  $param['productsSize_id'];
             };
 
@@ -59,6 +59,42 @@ class VBarcode
             };
         };
     }
+
+    //Поиск по любой части******************************************************************************
+    public static function FindProducts($searchQuery)
+    {
+        //Db::log('Штрихкод: ' . $barcode);
+        $words = preg_split('/\s+/', trim($searchQuery));
+
+       
+
+        $sqlArray =  "SELECT 
+        
+                      B.id as id, 
+                      B.name as name, 
+
+                      B.products_id as products_id,
+                      P.name as productsname, 
+        
+                      B.productsColor_id as productsColor_id, 
+                      PColor.name as colorname, 
+        
+                      B.productsSize_id as productsSize_id, 
+                      PSize.name as sizename
+
+                      FROM barcode B
+                      LEFT JOIN products P ON B.products_id = P.id
+                      LEFT JOIN productsColor PColor ON B.productsColor_id = PColor.id
+                      LEFT JOIN productsSize PSize ON B.productsSize_id = PSize.id
+                      WHERE ( B.name = " . $words . " )";
+
+        $findItems = Db::getSQLPackage($sqlArray);
+
+        
+
+        return $findItems;
+    }
+
     //Поиск по штрихкоду******************************************************************************
     public static function Find($barcode)
     {

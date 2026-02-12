@@ -475,6 +475,10 @@ class Obmen
                         $output = VBarcode::Find($data);
                     };
                     break;
+                case 'FindProductByBarcode': {
+                        $output = VBarcode::FindProducts($data);
+                    };
+                    break;
                 case 'ListBarcodeProducts': {
                         $output = VBarcode::ListBarcodeProducts($data['products_id']);
                     };
