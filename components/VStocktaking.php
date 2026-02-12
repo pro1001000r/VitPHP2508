@@ -46,7 +46,7 @@ class VStocktaking
 
         //Проверяем штрихкод
         VBarcode::CreateUpdate($param);
-        
+
         if ($nomeninv != []) {
             $invred  = $nomeninv[0];
 
@@ -113,9 +113,8 @@ class VStocktaking
         P.price as price, 
         P.name as productsname, 
         P.code1c as code1c, 
-        
-        P.compositions_id as compositions_id, 
-        Comp.name as compositionsname, 
+        P.description as description, 
+        P.foto as foto, 
 
         S.productsColor_id as productsColor_id, 
         PColor.name as colorname, 
@@ -139,7 +138,6 @@ class VStocktaking
         LEFT JOIN users U ON S.users_id = U.id
         LEFT JOIN place Pl ON S.place_id = Pl.id
         LEFT JOIN storage St ON S.storage_id = St.id
-        LEFT JOIN compositions Comp ON P.compositions_id = Comp.id
         ORDER BY date DESC";
 
         $sqlArray[] = "CREATE TEMPORARY TABLE vittemp " . $sqllj;
