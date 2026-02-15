@@ -170,4 +170,29 @@ class VStocktaking
 
         return $findlist;
     }
+    //получение записей в инвентаризации ******************************************************************************
+    public static function GetStocktakingCount($param)
+    {
+
+        //Db::log($sqllj);
+
+        if (!empty($param)) {
+            //временная таблица
+            //$sqlArray[] = "CREATE TEMPORARY TABLE vittemp " . $sqllj;
+
+
+            $tableName = $param['tableName'];
+            $tableId = $param['tableId'];
+            $sqlArray[] =  "SELECT Count(*) as ColItem FROM stocktaking WHERE ( " . $tableName . " = " . $tableId . " )";
+        }
+        $Countvit = Db::getSQLPackage($sqlArray);
+
+        if (count($Countvit) > 0) {
+            $findlist = $Countvit[0]['ColItem'];
+        } else {
+            $findlist = 0;
+        };
+
+        return $findlist;
+    }
 }

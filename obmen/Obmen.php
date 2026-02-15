@@ -469,6 +469,15 @@ class Obmen
                         $output = VStocktaking::GetStocktaking($data);
                     };
                     break;
+                case 'GetStocktakingCount': {
+
+                        $id = $data['tableId'];
+                        $table = $data['tableName'];
+
+                        $output = VStocktaking::GetStocktakingCount($data);
+                    };
+                    break;
+
 
                 //Штрихкод    
                 case 'GetProductByBarcode': {
