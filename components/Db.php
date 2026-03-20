@@ -50,39 +50,18 @@ class Db
         return 0;
     }
 
-    public static function getSQL($sql = [], $params = '')
+    public static function getSQL($sql = '', $params = [])
     {
         // подключение к базе
         $db = self::getConnection();
 
-        // подстановка текста запроса в коннект
-        if (is_array($sql)) {
-            foreach ($sql as $sqlElem) {
-                $result = $db->query($sqlElem);
-            }
-        } else {
-            $result = $db->prepare($sql);
-        };
+        $result = $db->prepare($sql);
 
-        // Устанавливаем параметры
-        if (is_array($params)) {
-            foreach ($params as $key => $value) {
-                $result->bindParam($key, $value);
-            }
-        }
         $result->setFetchMode(PDO::FETCH_ASSOC);
-        $result->execute();
 
-        $list = [];
-        $i = 0;
-        while ($row = $result->fetch()) {
-            $list[$i] = $row;
-            $i++;
-        }
-        // if (empty($i)) {
-        //     $list = false;
-        // }
-        return $list;
+        $result->execute($params);
+
+        return $result->fetchAll();
     }
 
     //Обновляет данные табличной части из vjsona

@@ -484,6 +484,12 @@ class Obmen
                         $output = VBarcode::Find($data);
                     };
                     break;
+                case 'FindProducts': {
+                        $params = [':name' => '%' . $data . '%'];
+                        $sql =  "SELECT * FROM products WHERE WHERE name LIKE :name";
+                        $output = Db::getSQL($sql, $params);
+                    };
+                    break;
                 case 'FindProductByBarcode': {
                         $output = VBarcode::FindProducts($data);
                     };
