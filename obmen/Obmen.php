@@ -422,9 +422,7 @@ class Obmen
                     };
                     break;
                 case 'GetTable': {
-
                         $table = $data['tableName'];
-
                         $sql[] = "SELECT * FROM " . $data['tableName'] . " ORDER BY name";
                         $output = Db::getSQLPackage($sql);
                     };
