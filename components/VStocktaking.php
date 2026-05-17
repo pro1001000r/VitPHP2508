@@ -170,11 +170,12 @@ class VStocktaking
 
         return $findlist;
     }
-    //получение записей в инвентаризации ******************************************************************************
+    //получение количества записей в инвентаризации ******************************************************************************
     public static function GetStocktakingCount($param)
     {
 
         //Db::log($sqllj);
+        $findlist = 0;
 
         if (!empty($param)) {
             //временная таблица
@@ -188,13 +189,47 @@ class VStocktaking
 
             $params = [':tableId' => $param['tableId']];
             $sql =  "SELECT Count(*) as ColItem FROM stocktaking WHERE ( `$tableName` = :tableId )";
-        }
-        $Countvit = Db::getSQL($sql, $params);
+            $Countvit = Db::getSQL($sql, $params);
 
-        if (count($Countvit) > 0) {
-            $findlist = $Countvit[0]['ColItem'];
+            if (count($Countvit) > 0) {
+                $findlist = $Countvit[0]['ColItem'];
+            };
+        }
+
+        return $findlist;
+    }
+
+    public static function GetProducts($param)
+    {
+
+        //Db::log($sqllj);
+        $findlist = [];
+
+        if (true) {
+            $sqllj = "SELECT
+            P.*,
+            COALESCE(S.total_count, 0) AS stocktakingcount,
+            C.name AS compositionsname
+            FROM
+            products P
+            LEFT JOIN (
+                    SELECT
+                        products_id,
+                        SUM(count) AS total_count
+                    FROM
+                        stocktaking
+                    GROUP BY
+                        products_id
+            ) S ON P.id = S.products_id
+            LEFT JOIN compositions C ON P.compositions_id = C.id
+            ORDER BY
+            P.name;";
+            $sqlArray[] = "CREATE TEMPORARY TABLE vittemp " . $sqllj;
+            $sqlArray[] = "SELECT * FROM vittemp";
+
+            $findlist = Db::getSQLPackage($sqlArray);
         } else {
-            $findlist = 0;
+            $findlist = [];
         };
 
         return $findlist;

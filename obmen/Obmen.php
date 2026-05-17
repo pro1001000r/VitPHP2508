@@ -326,7 +326,7 @@ class Obmen
     public function actionMobile()
     {
 
-        //header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Headers: * ');
 
         $strinput = file_get_contents('php://input');
@@ -443,6 +443,13 @@ class Obmen
                         } else {
                             $output = '';
                         };
+                    };
+                    break;
+
+                //товары
+                case 'GetProducts': {
+
+                        $output = VStocktaking::GetProducts($data);
                     };
                     break;
 
