@@ -182,10 +182,14 @@ class VStocktaking
 
 
             $tableName = $param['tableName'];
-            $tableId = $param['tableId'];
-            $sqlArray[] =  "SELECT Count(*) as ColItem FROM stocktaking WHERE ( " . $tableName . " = " . $tableId . " )";
+            // $tableId = $param['tableId'];
+
+            // $sqlArray =  "SELECT Count(*) as ColItem FROM stocktaking WHERE ( " . $tableName . " = " . $tableId . " )";
+
+            $params = [':tableId' => $param['tableId']];
+            $sql =  "SELECT Count(*) as ColItem FROM stocktaking WHERE ( `$tableName` = :tableId )";
         }
-        $Countvit = Db::getSQLPackage($sqlArray);
+        $Countvit = Db::getSQL($sql, $params);
 
         if (count($Countvit) > 0) {
             $findlist = $Countvit[0]['ColItem'];
